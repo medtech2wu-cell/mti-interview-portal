@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCAS 1.2 Interview Portal - Medical Technology International Program | Walailak University</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Prompt & Sarabun -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Official Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        maroon: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                            950: '#4c0519',
+                        },
+                        gold: {
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                        }
+                    },
+                    fontFamily: {
+                        prompt: ['Prompt', 'sans-serif'],
+                        sarabun: ['Sarabun', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #fcfcfd;
+        }
+        .maroon-gradient {
+            background: linear-gradient(135deg, #4c0519 0%, #881337 50%, #9f1239 100%);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #facc15 0%, #eab308 50%, #ca8a04 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(241, 245, 249, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 bg-slate-50/50">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-maroon-950 text-gold-400 text-xs py-2 px-4 text-center font-medium border-b border-gold-500/20 flex justify-between items-center max-w-7xl mx-auto w-full">
+        <div class="flex items-center gap-2 mx-auto sm:mx-0">
+            <span id="cloudStatus" class="inline-flex items-center gap-1.5 text-amber-400">
+                <i class="fa-solid fa-cloud-sun animate-pulse"></i> Supabase Protected System
+            </span>
+            <span class="hidden md:inline">| ระบบแจ้งลำดับการสัมภาษณ์ออนไลน์ TCAS 1.2 ปีการศึกษา 2569</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-4 text-slate-300 text-xs">
+            <span><i class="fa-solid fa-graduation-cap text-gold-400 mr-1"></i> มหาวิทยาลัยวลัยลักษณ์</span>
+            <button id="adminToggleBtn" class="text-gold-400 hover:text-gold-300 font-semibold underline flex items-center gap-1 transition">
+                <i class="fa-solid fa-shield-halved text-xs"></i> <span id="adminToggleText">เข้าสู่ระบบ Admin</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="maroon-gradient text-white shadow-xl relative overflow-hidden sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:py-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Branding Logo & Title -->
+            <div class="flex items-center gap-3.5 cursor-pointer" id="brandBtn">
+                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white p-1.5 shadow-lg flex items-center justify-center shrink-0 border-2 border-gold-400">
+                    <div class="w-full h-full rounded-xl bg-maroon-900 flex items-center justify-center text-gold-400 font-bold text-xl">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-xs md:text-sm text-gold-300 font-semibold tracking-wide uppercase">
+                        Walailak University • School of Allied Health Sciences
+                    </div>
+                    <h1 class="text-lg md:text-2xl font-bold tracking-tight text-white leading-tight">
+                        Medical Technology <span class="text-gold-400 font-normal">(International Program)</span>
+                    </h1>
+                    <p class="text-xs text-rose-100 font-light">TCAS 1.2 Interview Portal 2026</p>
+                </div>
+            </div>
+
+            <!-- Header Navigation Buttons -->
+            <nav class="flex flex-wrap justify-center gap-1.5 bg-black/20 p-1.5 rounded-xl border border-white/10 text-xs md:text-sm">
+                <button id="nav-home" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 bg-white/20 text-white shadow">
+                    <i class="fa-solid fa-house"></i> หน้าแรก
+                </button>
+                <button id="nav-schedule" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-100 hover:bg-white/10">
+                    <i class="fa-solid fa-magnifying-glass"></i> ค้นหาตารางสัมภาษณ์
+                </button>
+                <button id="nav-online-info" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-100 hover:bg-white/10">
+                    <i class="fa-solid fa-video"></i> การสัมภาษณ์ออนไลน์
+                </button>
+                <button id="nav-committee" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-100 hover:bg-white/10">
+                    <i class="fa-solid fa-user-tie"></i> คณะกรรมการ
+                </button>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 relative z-20">
+
+        <!-- ==================== TAB 1: HOME PAGE ==================== -->
+        <section id="tab-home" class="tab-content space-y-8">
+            
+            <!-- Hero Highlight Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl border-2 border-gold-400/40 relative overflow-hidden bg-gradient-to-br from-white via-rose-50/30 to-amber-50/20">
+                <div class="absolute -right-10 -bottom-10 opacity-5 text-maroon-900 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                
+                <div class="max-w-2xl relative z-10">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 bg-maroon-900 text-gold-400 rounded-full text-xs font-semibold mb-4 shadow-sm border border-gold-500/30">
+                        <i class="fa-solid fa-star text-gold-400"></i> ประกาศสำคัญสำหรับผู้สมัคร TCAS 1.2
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight mb-4">
+                        ยินดีต้อนรับผู้สมัครสอบสัมภาษณ์ <br>
+                        <span class="text-maroon-900">หลักสูตรเทคนิคการแพทย์ (นานาชาติ)</span>
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base mb-8 leading-relaxed font-sarabun">
+                        สำนักวิชาสหเวชศาสตร์ มหาวิทยาลัยวลัยลักษณ์ ขอแจ้งกำหนดการและรายละเอียดการสอบสัมภาษณ์ออนไลน์ สำหรับผู้สมัครเข้าศึกษาต่อในระดับปริญญาตรี รอบ TCAS 1.2 ประจำปีการศึกษา 2569
+                    </p>
+
+                    <!-- Date & Time Highlight Box -->
+                    <div class="bg-maroon-900 text-white rounded-2xl p-5 sm:p-6 mb-8 shadow-lg border-l-4 border-gold-400 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-gold-400 text-xl shrink-0">
+                                <i class="fa-regular fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-rose-200">วันสอบสัมภาษณ์</div>
+                                <div class="text-base sm:text-lg font-bold text-white">วันเสาร์ที่ 7 พฤศจิกายน 2569</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
+                            <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-gold-400 text-xl shrink-0">
+                                <i class="fa-regular fa-clock"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-rose-200">เวลาเริ่มสัมภาษณ์</div>
+                                <div class="text-base sm:text-lg font-bold text-gold-400">09.00 น. เป็นต้นไป</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button id="ctaSearchBtn" class="flex-1 maroon-gradient hover:opacity-95 text-white font-semibold py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition flex items-center justify-center gap-3 group text-base">
+                            <i class="fa-solid fa-magnifying-glass text-gold-400 group-hover:scale-110 transition"></i>
+                            <span>ตรวจสอบตารางสัมภาษณ์</span>
+                        </button>
+                        <button id="ctaInfoBtn" class="flex-1 bg-white hover:bg-slate-50 text-maroon-900 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-200 shadow-md hover:shadow-lg transition flex items-center justify-center gap-3 text-base">
+                            <i class="fa-solid fa-video text-maroon-700"></i>
+                            <span>ข้อมูลการสัมภาษณ์ออนไลน์</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Features Quick Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-rose-50 text-maroon-800 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base mb-2">ความเป็นส่วนตัวสูง</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sarabun">
+                        นักเรียนสามารถค้นหาตารางและห้องสัมภาษณ์ได้เฉพาะตนเองโดยใช้เลขที่สมัครหรือชื่อ-สกุล เพื่อความเป็นส่วนตัว
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-gold-600 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base mb-2">เข้าห้อง Zoom ในคลิกเดียว</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sarabun">
+                        มีปุ่มเชื่อมต่อไปยัง Zoom Meeting และคัดลอก Meeting ID ได้อย่างรวดเร็ว ป้องกันการเข้าผิดห้อง
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base mb-2">Supabase Cloud Security</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sarabun">
+                        คุ้มครองข้อมูลด้วย Supabase RLS และ Edge Functions ค้นหาปลอดภัย ไม่เปิดเผยข้อมูลผู้สมัครอื่น
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 2: SCHEDULE SEARCH PAGE ==================== -->
+        <section id="tab-schedule" class="tab-content hidden space-y-6">
+            
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">ค้นหาตารางสัมภาษณ์ส่วนบุคคล</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-sarabun mt-1">กรอกเลขที่สมัคร หรือชื่อ-นามสกุล ของท่านเพื่อตรวจสอบลำดับ เวลา และห้องสัมภาษณ์</p>
+            </div>
+
+            <!-- Search Card Box -->
+            <div class="glass-card rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto border border-slate-200">
+                <form id="searchForm" class="space-y-4">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        ค้นหาด้วยเลขที่สมัคร / ชื่อ หรือ นามสกุล (ตรงตามจริง)
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                        </div>
+                        <input type="text" id="searchInput" maxlength="60"
+                            class="w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-300 rounded-2xl text-base sm:text-lg font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-maroon-800 focus:bg-white transition shadow-inner"
+                            placeholder="เช่น 17000218 หรือ พุทธิดา พรมจันทร์...">
+                        <button type="button" id="clearBtn" class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-circle-xmark text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button type="submit" id="submitSearchBtn" class="flex-1 maroon-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-base">
+                            <i class="fa-solid fa-search"></i> ค้นหาข้อมูล
+                        </button>
+                        <button type="button" id="resetSearchBtn" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl transition text-sm">
+                            ล้างค่า
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="searchLoading" class="hidden text-center py-12">
+                <div class="inline-block w-10 h-10 border-4 border-maroon-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-sm font-medium text-slate-600">กำลังค้นหาข้อมูลผ่านระบบรักษาความปลอดภัย Edge Function...</p>
+            </div>
+
+            <!-- Search Not Found Message -->
+            <div id="searchNotFound" class="hidden glass-card max-w-2xl mx-auto rounded-2xl p-8 text-center border-2 border-rose-200 bg-rose-50/50">
+                <div class="w-16 h-16 bg-rose-100 text-maroon-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">ไม่พบข้อมูลการสัมภาษณ์</h3>
+                <p id="notFoundSubtext" class="text-xs sm:text-sm text-slate-600 font-sarabun mb-4">
+                    โปรดตรวจสอบเลขที่สมัคร (8 หลัก) หรือสะกดชื่อ-นามสกุลให้ตรงตามจริงอีกครั้ง
+                </p>
+                <button id="contactStaffBtn" class="text-xs text-maroon-900 font-bold underline hover:text-maroon-700">
+                    <i class="fa-solid fa-headset mr-1"></i> ดูข้อมูลการสัมภาษณ์ออนไลน์และกลุ่ม LINE
+                </button>
+            </div>
+
+            <!-- PERSONAL INTERVIEW CARD (SINGLE RESULT VIEW) -->
+            <div id="personalCard" class="hidden max-w-3xl mx-auto glass-card border-2 border-gold-400 rounded-3xl shadow-2xl overflow-hidden bg-white">
+                
+                <!-- Card Header -->
+                <div class="maroon-gradient text-white p-6 sm:p-8 relative">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div>
+                            <span class="inline-block px-3 py-1 bg-gold-400 text-maroon-950 font-extrabold text-xs rounded-full uppercase mb-2 shadow-sm">
+                                Verified Candidate Profile
+                            </span>
+                            <h3 id="cardFullName" class="text-2xl sm:text-3xl font-bold tracking-wide"></h3>
+                            <p class="text-xs text-rose-200 font-sarabun mt-1">หลักสูตรเทคนิคการแพทย์ (นานาชาติ) • รอบ TCAS 1.2</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-right sm:text-right shrink-0">
+                            <div class="text-xs text-rose-200">เลขที่สมัคร (App No.)</div>
+                            <div id="cardAppId" class="text-xl font-mono font-bold text-gold-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Interview Details Grid -->
+                <div class="p-6 sm:p-8 space-y-6">
+                    
+                    <!-- TIME & ROOM HIGHLIGHT -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Time Slot Box -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50/50 p-6 rounded-2xl border-2 border-amber-300/70 shadow-sm text-center">
+                            <div class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-regular fa-clock text-amber-600 text-base"></i> ลำดับเวลาสัมภาษณ์
+                            </div>
+                            <div id="cardTime" class="text-2xl sm:text-3xl font-black text-amber-900 tracking-tight my-1"></div>
+                            <div class="text-xs text-amber-700/80 font-sarabun">7 พฤศจิกายน 2569</div>
+                        </div>
+
+                        <!-- Interview Room Box -->
+                        <div class="bg-gradient-to-br from-rose-50 to-red-50/50 p-6 rounded-2xl border-2 border-rose-300/70 shadow-sm text-center">
+                            <div class="text-xs font-bold text-maroon-800 uppercase tracking-wider mb-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-door-open text-maroon-700 text-base"></i> ห้องสัมภาษณ์
+                            </div>
+                            <div id="cardRoom" class="text-2xl sm:text-3xl font-black text-maroon-950 tracking-tight my-1"></div>
+                            <div class="text-xs text-maroon-800/80 font-sarabun">ระบบสัมภาษณ์ Zoom Online</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Additional Details Table List -->
+                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 divide-y divide-slate-200/80 text-xs sm:text-sm">
+                        <div class="py-2.5 flex justify-between items-center">
+                            <span class="text-slate-500 font-medium">ลำดับที่ (No.)</span>
+                            <span id="cardNo" class="font-bold text-slate-800"></span>
+                        </div>
+                        <div class="py-2.5 flex justify-between items-center">
+                            <span class="text-slate-500 font-medium">สถานะสิทธิ์การสัมภาษณ์</span>
+                            <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs">
+                                <i class="fa-solid fa-circle-check mr-1"></i> มีสิทธิ์เข้ารับการสัมภาษณ์
+                            </span>
+                        </div>
+                        <div class="py-2.5 flex justify-between items-start">
+                            <span class="text-slate-500 font-medium shrink-0 pt-0.5">คณะกรรมการสัมภาษณ์</span>
+                            <span id="cardCommittee" class="font-medium text-slate-800 text-right whitespace-pre-line font-sarabun"></span>
+                        </div>
+                    </div>
+
+                    <!-- Direct Zoom Button Action -->
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <a id="cardZoomLink" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 maroon-gradient hover:opacity-95 text-white font-bold py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition flex items-center justify-center gap-2.5 text-base">
+                            <i class="fa-solid fa-video text-gold-400 text-xl"></i>
+                            <span>เปิดแอปพลิเคชัน ZOOM เพื่อเข้าสัมภาษณ์</span>
+                        </a>
+                        <button id="copyMeetingIdBtn" class="px-5 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl border border-slate-300 transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-regular fa-copy"></i> คัดลอก Meeting ID
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 3: ONLINE INTERVIEW INFO ==================== -->
+        <section id="tab-online-info" class="tab-content hidden space-y-8">
+            
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">ข้อมูลการสัมภาษณ์ออนไลน์ (Zoom Meeting)</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-sarabun mt-1">รายละเอียดลิงก์ Zoom และคำแนะนำสำหรับการสอบสัมภาษณ์ออนไลน์</p>
+            </div>
+
+            <!-- Zoom Info Main Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    
+                    <!-- Left: Meeting Details -->
+                    <div class="md:col-span-2 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-rose-100 text-maroon-900 rounded-full text-xs font-semibold">
+                            <i class="fa-solid fa-video text-maroon-700"></i> Official Zoom Room
+                        </div>
+
+                        <h3 id="displayZoomTopic" class="text-xl sm:text-2xl font-bold text-slate-900">
+                            Topic: สัมภาษณ์ TCAS 1.2
+                        </h3>
+
+                        <div class="space-y-2 text-xs sm:text-sm font-sarabun text-slate-600">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-calendar text-maroon-800 w-5"></i>
+                                <span><strong>Date:</strong> <span id="displayZoomDate">November 7, 2026</span></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-maroon-800 w-5"></i>
+                                <span><strong>Time:</strong> <span id="displayZoomTime">08:30 AM (Bangkok Time)</span></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-hashtag text-maroon-800 w-5"></i>
+                                <span><strong>Meeting ID:</strong> <span id="displayZoomId" class="font-mono font-bold text-slate-800 text-base">991 5540 2901</span></span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                            <a id="displayZoomBtn" href="#" target="_blank" rel="noopener noreferrer" class="maroon-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition inline-flex items-center justify-center gap-2 text-sm">
+                                <i class="fa-solid fa-right-to-bracket text-gold-400"></i> Join Zoom Meeting
+                            </a>
+                            <button id="copyZoomInfoBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3.5 px-5 rounded-xl border border-slate-300 transition text-sm">
+                                <i class="fa-regular fa-copy mr-1"></i> คัดลอกรายละเอียด
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: LINE Group QR Code Box -->
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-200 text-center flex flex-col items-center justify-center">
+                        <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">
+                            <i class="fa-brands fa-line text-emerald-600 text-lg mr-1"></i> กลุ่ม LINE ผู้สัมภาษณ์
+                        </div>
+                        
+                        <!-- QR Code Frame -->
+                        <div class="w-36 h-36 bg-white p-2 rounded-xl shadow-md border border-emerald-200 mb-3 flex items-center justify-center overflow-hidden">
+                            <img id="displayLineQr" src="" alt="Line QR Code" class="w-full h-full object-contain">
+                        </div>
+                        
+                        <p class="text-[11px] text-emerald-700 font-sarabun">สแกนเพื่อเข้ากลุ่ม LINE สอบถามเจ้าหน้าที่</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Guidelines Checklist -->
+            <div class="max-w-4xl mx-auto bg-amber-50/80 border border-amber-200 rounded-3xl p-6 sm:p-8">
+                <h3 class="font-bold text-amber-900 text-base sm:text-lg mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-amber-600"></i> คำแนะนำและข้อปฏิบัติในการเข้าสัมภาษณ์ออนไลน์
+                </h3>
+                <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-amber-900/90 font-sarabun leading-relaxed">
+                    <li>ผู้สมัครควรเตรียมตัวเข้าห้อง Zoom ล่วงหน้าก่อนถึงลำดับเวลาสัมภาษณ์ของตนเองอย่างน้อย <strong>15-20 นาที</strong></li>
+                    <li>เมื่อเข้าห้อง Zoom โปรดตั้งชื่อ Display Name เป็น <strong>"ลำดับที่_ชื่อ-นามสกุล"</strong> (เช่น 01_พุทธิดา พรมจันทร์)</li>
+                    <li>โปรดเปิดกล้องและไมโครโฟน พร้อมเตรียม <strong>บัตรประชาชน หรือ บัตรนักเรียน</strong> เพื่อแสดงยืนยันตัวตนก่อนการสัมภาษณ์</li>
+                    <li>เตรียมสถานที่ที่มีสัญญาณอินเทอร์เน็ตเสถียร เงียบสงบ และไม่มีเสียงรบกวนภายนอก</li>
+                </ol>
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 4: COMMITTEE PAGE ==================== -->
+        <section id="tab-committee" class="tab-content hidden space-y-8">
+            
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">คณะกรรมการสอบสัมภาษณ์</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-sarabun mt-1">คณาจารย์ผู้ทรงคุณวุฒิ หลักสูตรเทคนิคการแพทย์ (นานาชาติ) มหาวิทยาลัยวลัยลักษณ์</p>
+            </div>
+
+            <!-- Committee Cards Container -->
+            <div id="committeeContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Dynamic Committee Cards rendered via DOM API -->
+            </div>
+
+        </section>
+
+        <!-- ==================== ADMIN DASHBOARD PANEL (SUPABASE DATABASE MANAGER) ==================== -->
+        <section id="admin-panel" class="hidden space-y-8 bg-slate-900 text-white -mx-4 p-6 sm:p-8 rounded-3xl mt-6 shadow-2xl border border-slate-800">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
+                <div>
+                    <span class="px-3 py-1 bg-gold-400 text-slate-950 font-bold text-xs rounded-full">Supabase RLS Protected</span>
+                    <h2 class="text-2xl font-bold text-white mt-1">ระบบจัดการข้อมูล Supabase Database</h2>
+                    <p class="text-xs text-slate-400">เข้าสู่ระบบโดยผู้ดูแล: <span id="adminUserEmail" class="text-gold-400 font-mono"></span></p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="exportCsvBtn" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-file-excel"></i> ส่งออก CSV
+                    </button>
+                    <button id="adminSignOutBtn" class="px-3.5 py-2 bg-rose-800 hover:bg-rose-700 text-white text-xs rounded-xl border border-rose-700 transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> ออกจากระบบ Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- SQL Guidance Modal Box -->
+            <div id="sqlHelpBox" class="hidden bg-slate-950 p-5 rounded-2xl border border-slate-700 space-y-3 text-xs text-slate-300">
+                <div class="flex justify-between items-center text-gold-400 font-bold border-b border-slate-800 pb-2">
+                    <span>ข้อมูลนโยบายความปลอดภัย RLS บน Supabase Server</span>
+                    <button id="closeSqlHelpBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p class="text-slate-400">
+                    ฐานข้อมูลและนโยบายความปลอดภัย Row Level Security (RLS) บน Supabase Server ได้ถูกติดตั้งและตั้งค่าสิทธิ์ไว้อย่างถูกต้องแล้ว 
+                    การเข้าถึงและแก้ไขข้อมูลผู้สมัคร สิทธิ์จะถูกบังคับผ่าน RLS กับบัญชีผู้ใช้ในตาราง <code class="text-amber-400">admin_profiles</code> โดยไม่เปิดสิทธิ์สาธารณะ
+                </p>
+            </div>
+
+            <!-- Import CSV Bar -->
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-gold-400 flex items-center gap-2">
+                            <i class="fa-solid fa-file-import"></i> นำเข้าข้อมูลผู้สมัครจาก Excel / CSV
+                        </h3>
+                        <p class="text-xs text-slate-400">เลือกไฟล์ CSV เพื่ออัปโหลดข้อมูลเข้า Supabase Database (พร้อมระบบตรวจสอบความถูกต้อง)</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                        <button id="selectCsvBtn" class="px-4 py-2 maroon-gradient hover:opacity-95 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-upload"></i> เลือกไฟล์ CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Student List Management Table -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gold-400 flex items-center gap-2">
+                            <i class="fa-solid fa-users-gear"></i> รายชื่อผู้สมัครสอบสัมภาษณ์ (Supabase Synced)
+                        </h3>
+                        <button id="openAddStudentBtn" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-plus"></i> เพิ่มผู้สมัครใหม่
+                        </button>
+                    </div>
+
+                    <!-- Students Data Table -->
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-800 sticky top-0 backdrop-blur-md">
+                                    <tr>
+                                        <th class="p-3 text-center">ลำดับ</th>
+                                        <th class="p-3">เลขสมัคร</th>
+                                        <th class="p-3">ชื่อ - นามสกุล</th>
+                                        <th class="p-3">เวลาสัมภาษณ์</th>
+                                        <th class="p-3 text-center">ห้อง</th>
+                                        <th class="p-3 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminStudentTable" class="divide-y divide-slate-800/60 text-slate-300">
+                                    <!-- Rendered via DOM API -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Col: Zoom & Audit Logs Config -->
+                <div class="space-y-6">
+                    
+                    <!-- Zoom & Line Config Box -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-sm font-bold text-gold-400 border-b border-slate-800 pb-2">
+                            <i class="fa-solid fa-sliders"></i> ตั้งค่า Zoom & LINE Group
+                        </h3>
+                        
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Topic</label>
+                                <input type="text" id="adminZoomTopic" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Meeting ID</label>
+                                <input type="text" id="adminMeetingId" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Zoom URL (HTTPS เท่านั้น)</label>
+                                <input type="text" id="adminZoomUrl" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">LINE QR Code Data / Link (HTTPS เท่านั้น)</label>
+                                <input type="text" id="adminLineQr" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <button id="saveZoomConfigBtn" class="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold rounded-xl transition text-xs shadow">
+                                บันทึกการตั้งค่าลง Supabase
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Audit Trail Log Box -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-sm font-bold text-gold-400 border-b border-slate-800 pb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> Audit Trail Log</span>
+                            <span class="text-[10px] text-slate-500 font-normal">Database Logs</span>
+                        </h3>
+                        <div id="adminAuditLogs" class="space-y-2 text-[11px] max-h-48 overflow-y-auto pr-1">
+                            <!-- Rendered via DOM API -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer Area -->
+    <footer class="maroon-gradient text-white text-xs py-8 mt-12 border-t-4 border-gold-400">
+        <div class="max-w-6xl mx-auto px-4 text-center space-y-3">
+            <div class="flex justify-center items-center gap-2 text-gold-400 font-bold text-sm">
+                <i class="fa-solid fa-microscope"></i> Medical Technology (International Program)
+            </div>
+            <p class="text-rose-200/80 max-w-xl mx-auto font-sarabun">
+                สำนักวิชาสหเวชศาสตร์ มหาวิทยาลัยวลัยลักษณ์ 222 ต.ไทยบุรี อ.ท่าศาลา จ.นครศรีธรรมราช 80160 <br>
+                โทรศัพท์: 0-7567-2603, 086-367-6176 | อีเมล: medtech2.wu@gmail.com
+            </p>
+            <div class="pt-2 text-[11px] text-rose-300/60 border-t border-white/10 max-w-md mx-auto">
+                © 2026 Walailak University. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMsg" class="font-medium"></span>
+    </div>
+
+    <!-- Modal Form: Add / Edit Student (Admin) -->
+    <div id="studentModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-slate-800">
+            <h3 id="modalTitle" class="text-lg font-bold text-maroon-950 border-b pb-2">เพิ่มข้อมูลผู้สมัครสัมภาษณ์</h3>
+            <input type="hidden" id="editAppId" value="">
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">เลขที่สมัคร (Application Number) <span class="text-rose-600">*</span></label>
+                    <input type="text" id="modalAppId" maxlength="20" class="w-full px-3 py-2 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-maroon-800 outline-none">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block font-semibold mb-1">คำนำหน้า</label>
+                        <input type="text" id="modalPrefix" maxlength="20" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="นางสาว">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">ชื่อ <span class="text-rose-600">*</span></label>
+                        <input type="text" id="modalFirstName" maxlength="50" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">นามสกุล <span class="text-rose-600">*</span></label>
+                        <input type="text" id="modalLastName" maxlength="50" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold mb-1">ลำดับเวลาสัมภาษณ์</label>
+                        <input type="text" id="modalTime" maxlength="30" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="9.00-9.20 น.">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">ห้องสัมภาษณ์</label>
+                        <input type="text" id="modalRoom" maxlength="20" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="ห้อง A">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">คณะกรรมการสัมภาษณ์</label>
+                    <textarea id="modalCommittee" rows="2" maxlength="250" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="1. รศ.ดร.มรกต ชาตาธิคุณ&#10;2. ผศ.ดร.วิลาวัณย์ ผลาชุม"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button type="button" id="cancelStudentModalBtn" class="px-4 py-2 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                <button type="button" id="saveStudentModalBtn" class="px-5 py-2 maroon-gradient text-white font-bold rounded-xl text-xs shadow-md">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form: Admin Login Modal -->
+    <div id="adminLoginModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-slate-800">
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-maroon-900 text-gold-400 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-md">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">เข้าสู่ระบบ Admin</h3>
+                <p class="text-xs text-slate-500 font-sarabun">ยืนยันตัวตนด้วยบัญชี Supabase Authentication</p>
+            </div>
+            
+            <form id="adminLoginForm" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">Email <span class="text-rose-600">*</span></label>
+                    <input type="email" id="adminEmailInput" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-maroon-800 outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">Password <span class="text-rose-600">*</span></label>
+                    <input type="password" id="adminPasswordInput" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-maroon-800 outline-none">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t">
+                    <button type="button" id="cancelAdminLoginBtn" class="px-4 py-2 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                    <button type="submit" id="adminLoginSubmitBtn" class="px-5 py-2 maroon-gradient text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-1.5">
+                        <span>เข้าสู่ระบบ</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form: CSV Import Strategy -->
+    <div id="csvImportModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-slate-800">
+            <h3 class="text-lg font-bold text-maroon-950 border-b pb-2">เลือกรูปแบบการนำเข้าข้อมูล CSV</h3>
+            <p id="csvImportSummary" class="text-xs text-slate-600 font-sarabun"></p>
+            
+            <div class="space-y-2 text-xs">
+                <label class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl cursor-pointer hover:bg-rose-50/50">
+                    <input type="radio" name="importMode" value="append" checked class="text-maroon-800">
+                    <div>
+                        <div class="font-bold text-slate-800">เพิ่มต่อท้ายเฉพาะรายการใหม่ (Append New Only)</div>
+                        <div class="text-[11px] text-slate-500">นำเข้าเฉพาะรายชื่อที่ไม่เคยมีในระบบ รายชื่อเดิมจะไม่ถูกเปลี่ยนแปลง</div>
+                    </div>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl cursor-pointer hover:bg-rose-50/50">
+                    <input type="radio" name="importMode" value="update" class="text-maroon-800">
+                    <div>
+                        <div class="font-bold text-slate-800">อัปเดตเฉพาะรายการที่มีอยู่เดิม (Update Existing Only)</div>
+                        <div class="text-[11px] text-slate-500">อัปเดตเฉพาะข้อมูลของผู้สมัครที่เลขที่สมัครตรงกันเท่านั้น</div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button id="cancelCsvBtn" class="px-4 py-2 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                <button id="executeCsvBtn" class="px-5 py-2 maroon-gradient text-white font-bold rounded-xl text-xs shadow-md">ดำเนินการนำเข้า</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form: Confirm Action Modal -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-slate-800 text-center">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 id="confirmTitle" class="text-lg font-bold text-slate-900">ยืนยันการทำรายการ</h3>
+                <p id="confirmMessage" class="text-xs text-slate-500 font-sarabun mt-1 leading-relaxed"></p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button type="button" id="confirmCancelBtn" class="flex-1 py-2.5 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                <button type="button" id="confirmExecuteBtn" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-md transition">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script: Secure Supabase Core -->
+    <script>
+        // Project Supabase Hardcoded Credentials (Static Deployment Safe)
+        const SUPABASE_URL = "https://evwbyjsxmkoesvsnehup.supabase.co";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_gHwggrcv1pmoGC6cWT9v8g_Wo97G-8o";
+
+        let supabaseClient = null;
+        let isAuthChecking = false;
+
+        // Global State (No hardcoded candidates in frontend source)
+        window.appData = {
+            students: [],
+            zoomConfig: {
+                topic: "สัมภาษณ์ TCAS 1.2",
+                date: "November 7, 2026",
+                time: "08:30 AM (Bangkok Time)",
+                meetingId: "991 5540 2901",
+                zoomUrl: "https://zoom.us/j/99155402901",
+                lineQrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://line.me/R/ti/g/tcas12-mt-wu"
+            },
+            committee: [
+                { id: 'c1', name: "รศ.ดร.มรกต ชาตาธิคุณ", role: "ประธานกรรมการสัมภาษณ์", dept: "สาขาวิชาเทคนิคการแพทย์ สำนักวิชาสหเวชศาสตร์", image: "https://placehold.co/200x200/881337/ffffff?text=Assoc.Prof.Moragot" },
+                { id: 'c2', name: "ผศ.ดร.วิลาวัณย์ ผลาชุม", role: "กรรมการสัมภาษณ์", dept: "สาขาวิชาเทคนิคการแพทย์ สำนักวิชาสหเวชศาสตร์", image: "https://placehold.co/200x200/881337/ffffff?text=Asst.Prof.Wilawan" }
+            ],
+            logs: []
+        };
+
+        window.isAdminMode = false;
+        window.currentAdminUser = null;
+        let pendingImportData = [];
+
+        // URL Sanitizer helper (only https allowed)
+        function sanitizeHttpsUrl(urlStr, fallback = '#') {
+            if (!urlStr || typeof urlStr !== 'string') return fallback;
+            const trimmed = urlStr.trim();
+            if (trimmed.startsWith('https://')) {
+                return trimmed;
+            }
+            return fallback;
+        }
+
+        // Initialize Supabase Client Connection
+        function initSupabase() {
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                document.getElementById('cloudStatus').textContent = 'Supabase Protected Connection';
+                
+                // Auth State Change Listener
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    if (isAuthChecking) return;
+                    isAuthChecking = true;
+                    if (session && session.user) {
+                        await verifyAndApplyAdminState(session.user);
+                    } else {
+                        applyLoggedOutState();
+                    }
+                    isAuthChecking = false;
+                });
+
+                fetchPublicConfigFromEdgeFunction();
+            } catch (e) {
+                console.error("Supabase init error:", e);
+                showToast("ไม่สามารถเชื่อมต่อกับ Supabase Client ได้", "error");
+            }
+        }
+
+        // Verify Admin Profile with Table admin_profiles
+        async function verifyAndApplyAdminState(user) {
+            if (!supabaseClient) return;
+
+            try {
+                const { data: profile, error } = await supabaseClient
+                    .from('admin_profiles')
+                    .select('user_id, role')
+                    .eq('user_id', user.id)
+                    .eq('role', 'admin')
+                    .maybeSingle();
+
+                if (!error && profile) {
+                    window.isAdminMode = true;
+                    window.currentAdminUser = user;
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    document.getElementById('adminToggleText').textContent = "ออกจากระบบ Admin";
+                    document.getElementById('adminUserEmail').textContent = user.email || '';
+                    await fetchAdminStudentsFromSupabase();
+                    await fetchAdminLogsFromSupabase();
+                } else {
+                    console.warn("User authenticated but lacks admin_profile entry");
+                    await supabaseClient.auth.signOut();
+                    applyLoggedOutState();
+                    showToast("บัญชีผู้ใช้นี้ไม่มีสิทธิ์ผู้ดูแลระบบ (Admin Profile Required)", "error");
+                }
+            } catch (err) {
+                console.error("Profile verification error:", err);
+                applyLoggedOutState();
+            }
+        }
+
+        function applyLoggedOutState() {
+            window.isAdminMode = false;
+            window.currentAdminUser = null;
+            window.appData.students = [];
+            window.appData.logs = [];
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('adminToggleText').textContent = "เข้าสู่ระบบ Admin";
+            document.getElementById('adminUserEmail').textContent = "";
+            renderAdminStudentTable();
+            renderAuditLogs();
+        }
+
+        // Fetch Public Config (Zoom/LINE) via Edge Function 'get-public-config'
+        async function fetchPublicConfigFromEdgeFunction() {
+            if (!supabaseClient) return;
+
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('get-public-config', {
+                    method: 'GET'
+                });
+
+                if (!error && data && data.success && data.config) {
+                    window.appData.zoomConfig = { ...window.appData.zoomConfig, ...data.config };
+                }
+            } catch (err) {
+                console.warn("Error fetching public config from Edge Function:", err);
+            }
+
+            renderUIComponents();
+        }
+
+        // Fetch Admin Full Students Table (Requires Authenticated Admin RLS)
+        async function fetchAdminStudentsFromSupabase() {
+            if (!supabaseClient || !window.isAdminMode) return;
+
+            const { data, error } = await supabaseClient
+                .from('students')
+                .select('no, app_id, prefix, first_name, last_name, time_slot, room, committee')
+                .order('no', { ascending: true });
+
+            if (error) {
+                showToast("ไม่สามารถดึงข้อมูลตารางผู้สมัคร: " + error.message, "error");
+                return;
+            }
+
+            if (data) {
+                window.appData.students = data.map(s => ({
+                    no: s.no,
+                    appId: s.app_id,
+                    prefix: s.prefix || '',
+                    firstName: s.first_name || '',
+                    lastName: s.last_name || '',
+                    time: s.time_slot || '',
+                    room: s.room || 'ห้อง A',
+                    committee: s.committee || ''
+                }));
+                renderAdminStudentTable();
+            }
+        }
+
+        // Fetch Admin Audit Logs (Requires Authenticated Admin RLS)
+        async function fetchAdminLogsFromSupabase() {
+            if (!supabaseClient || !window.isAdminMode) return;
+
+            const { data, error } = await supabaseClient
+                .from('audit_logs')
+                .select('action, details, performed_by, created_at')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (!error && data) {
+                window.appData.logs = data.map(l => ({
+                    action: l.action,
+                    details: l.details,
+                    by: l.performed_by,
+                    time: new Date(l.created_at).toLocaleTimeString('th-TH')
+                }));
+                renderAuditLogs();
+            }
+        }
+
+        // Public Student Search via Edge Function 'search-student'
+        async function handleSearch(e) {
+            e.preventDefault();
+            const queryInput = document.getElementById('searchInput');
+            const query = queryInput.value.trim();
+            
+            if (!query) {
+                showToast("โปรดกรอกเลขที่สมัคร หรือชื่อ-นามสกุล ที่ต้องการค้นหา", "error");
+                return;
+            }
+
+            if (query.length > 60) {
+                showToast("ความยาวของคำค้นหาต้องไม่เกิน 60 ตัวอักษร", "error");
+                return;
+            }
+
+            document.getElementById('searchLoading').classList.remove('hidden');
+            document.getElementById('searchNotFound').classList.add('hidden');
+            document.getElementById('personalCard').classList.add('hidden');
+
+            try {
+                if (!supabaseClient) {
+                    throw new Error("ระบบยังไม่ได้เชื่อมต่อกับ Supabase Client");
+                }
+
+                // Invoke Edge Function securely
+                const { data, error } = await supabaseClient.functions.invoke('search-student', {
+                    body: { query: query }
+                });
+
+                document.getElementById('searchLoading').classList.add('hidden');
+
+                if (error || !data || !data.success || !data.student) {
+                    document.getElementById('searchNotFound').classList.remove('hidden');
+                } else {
+                    displayPersonalCard(data.student);
+                }
+            } catch (err) {
+                console.error("Search Error:", err);
+                document.getElementById('searchLoading').classList.add('hidden');
+                showToast(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อค้นหาข้อมูล", "error");
+            }
+        }
+
+        // Render Personal Candidate Card using Secure DOM API
+        function displayPersonalCard(s) {
+            const cardFullName = document.getElementById('cardFullName');
+            const cardAppId = document.getElementById('cardAppId');
+            const cardNo = document.getElementById('cardNo');
+            const cardTime = document.getElementById('cardTime');
+            const cardRoom = document.getElementById('cardRoom');
+            const cardCommittee = document.getElementById('cardCommittee');
+            const cardZoomLink = document.getElementById('cardZoomLink');
+
+            cardFullName.textContent = `${s.prefix || ''}${s.firstName || s.first_name || ''} ${s.lastName || s.last_name || ''}`.trim();
+            cardAppId.textContent = s.appId || s.app_id || '';
+            cardNo.textContent = s.no != null ? String(s.no) : '-';
+            cardTime.textContent = s.time || s.time_slot || '09.00 - 09.20 น.';
+            cardRoom.textContent = s.room || 'ห้อง A';
+            cardCommittee.textContent = s.committee || '-';
+            cardZoomLink.href = sanitizeHttpsUrl(window.appData.zoomConfig.zoomUrl);
+
+            document.getElementById('personalCard').classList.remove('hidden');
+            document.getElementById('personalCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('personalCard').classList.add('hidden');
+            document.getElementById('searchNotFound').classList.add('hidden');
+            document.getElementById('clearBtn').classList.add('hidden');
+        }
+
+        // Navigation Controller
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-white/20', 'text-white', 'shadow');
+                btn.classList.add('text-rose-100', 'hover:bg-white/10');
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) activeTab.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white/20', 'text-white', 'shadow');
+                activeBtn.classList.remove('text-rose-100');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Admin Auth Flow
+        function handleAdminAuthButton() {
+            if (window.isAdminMode) {
+                showConfirmModal(
+                    "ยืนยันการออกจากระบบ",
+                    "คุณต้องการออกจากระบบ Admin ใช่หรือไม่?",
+                    async () => {
+                        if (supabaseClient) await supabaseClient.auth.signOut();
+                        applyLoggedOutState();
+                        showToast("ออกจากระบบ Admin เรียบร้อยแล้ว", "info");
+                    }
+                );
+            } else {
+                document.getElementById('adminLoginModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmailInput').value.trim();
+            const password = document.getElementById('adminPasswordInput').value.trim();
+
+            if (!email || !password) {
+                showToast("โปรดกรอก Email และ Password", "error");
+                return;
+            }
+
+            if (!supabaseClient) {
+                showToast("ไม่พบการเชื่อมต่อ Supabase Client", "error");
+                return;
+            }
+
+            const btn = document.getElementById('adminLoginSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'กำลังตรวจสอบ...';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                btn.disabled = false;
+                btn.textContent = 'เข้าสู่ระบบ';
+
+                if (error) {
+                    showToast("การเข้าสู่ระบบล้มเหลว: " + error.message, "error");
+                    return;
+                }
+
+                closeAdminLoginModal();
+                showToast("ยืนยันตัวตนสำเร็จ กำลังตรวจสอบสิทธิ์...", "success");
+                await verifyAndApplyAdminState(data.user);
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'เข้าสู่ระบบ';
+                showToast("เกิดข้อผิดพลาดในการเข้าสู่ระบบ", "error");
+            }
+        }
+
+        // Update Zoom Display Elements Safe
+        function updateZoomDisplay() {
+            const z = window.appData.zoomConfig;
+            document.getElementById('displayZoomTopic').textContent = `Topic: ${z.topic || ''}`;
+            document.getElementById('displayZoomDate').textContent = z.date || '';
+            document.getElementById('displayZoomTime').textContent = z.time || '';
+            document.getElementById('displayZoomId').textContent = z.meetingId || '';
+            document.getElementById('displayZoomBtn').href = sanitizeHttpsUrl(z.zoomUrl);
+            document.getElementById('displayLineQr').src = sanitizeHttpsUrl(z.lineQrUrl);
+
+            document.getElementById('adminZoomTopic').value = z.topic || '';
+            document.getElementById('adminMeetingId').value = z.meetingId || '';
+            document.getElementById('adminZoomUrl').value = z.zoomUrl || '';
+            document.getElementById('adminLineQr').value = z.lineQrUrl || '';
+        }
+
+        async function saveZoomConfig() {
+            if (!window.isAdminMode || !supabaseClient) {
+                showToast("ต้องเข้าสู่ระบบแอดมินก่อนดำเนินการ", "error");
+                return;
+            }
+
+            const zoomUrlVal = document.getElementById('adminZoomUrl').value.trim();
+            const lineQrVal = document.getElementById('adminLineQr').value.trim();
+
+            if (zoomUrlVal && !zoomUrlVal.startsWith('https://')) {
+                showToast("Zoom URL ต้องขึ้นต้นด้วย https:// เท่านั้น", "error");
+                return;
+            }
+            if (lineQrVal && !lineQrVal.startsWith('https://')) {
+                showToast("LINE QR Code Link ต้องขึ้นต้นด้วย https:// เท่านั้น", "error");
+                return;
+            }
+
+            const updatedConfig = {
+                topic: document.getElementById('adminZoomTopic').value.trim(),
+                meetingId: document.getElementById('adminMeetingId').value.trim(),
+                zoomUrl: zoomUrlVal,
+                lineQrUrl: lineQrVal,
+                date: window.appData.zoomConfig.date || "November 7, 2026",
+                time: window.appData.zoomConfig.time || "08:30 AM (Bangkok Time)"
+            };
+
+            const { error } = await supabaseClient
+                .from('system_settings')
+                .upsert({ id: 'zoom_config', config: updatedConfig });
+
+            if (error) {
+                showToast("เกิดข้อผิดพลาดในการบันทึก Zoom Config: " + error.message, "error");
+                return;
+            }
+
+            window.appData.zoomConfig = updatedConfig;
+            await insertAuditLog("อัปเดตระบบ", "แก้ไขข้อมูล Zoom & LINE Group");
+            updateZoomDisplay();
+            showToast("บันทึกข้อมูลการตั้งค่า Zoom เรียบร้อยแล้ว", "success");
+        }
+
+        // Render Committee Cards using DOM API
+        function renderCommitteeCards() {
+            const container = document.getElementById('committeeContainer');
+            container.innerHTML = '';
+
+            window.appData.committee.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-3xl p-6 shadow-xl border border-slate-200 flex flex-col sm:flex-row items-center gap-5 bg-white hover:border-gold-400 transition";
+
+                const img = document.createElement('img');
+                img.src = sanitizeHttpsUrl(c.image);
+                img.alt = c.name;
+                img.className = "w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-gold-400 shadow-md shrink-0";
+
+                const info = document.createElement('div');
+                info.className = "text-center sm:text-left";
+
+                const badge = document.createElement('span');
+                badge.className = "px-2.5 py-0.5 bg-rose-100 text-maroon-900 rounded-full text-[11px] font-bold";
+                badge.textContent = c.role;
+
+                const name = document.createElement('h4');
+                name.className = "text-base sm:text-lg font-bold text-slate-900 mt-1";
+                name.textContent = c.name;
+
+                const dept = document.createElement('p');
+                dept.className = "text-xs text-slate-500 font-sarabun mt-1 leading-relaxed";
+                dept.textContent = c.dept;
+
+                info.appendChild(badge);
+                info.appendChild(name);
+                info.appendChild(dept);
+                card.appendChild(img);
+                card.appendChild(info);
+
+                container.appendChild(card);
+            });
+        }
+
+        // Render Admin Table using DOM API
+        function renderAdminStudentTable() {
+            const tbody = document.getElementById('adminStudentTable');
+            tbody.innerHTML = '';
+
+            if (window.appData.students.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 6;
+                td.className = "p-6 text-center text-slate-500";
+                td.textContent = window.isAdminMode ? "ไม่พบข้อมูลผู้สมัครในฐานข้อมูล" : "กรุณาเข้าสู่ระบบ Admin เพื่อดูข้อมูล";
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+
+            window.appData.students.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/60 transition";
+
+                const tdNo = document.createElement('td');
+                tdNo.className = "p-3 text-center font-bold text-slate-400";
+                tdNo.textContent = s.no || (idx + 1);
+
+                const tdAppId = document.createElement('td');
+                tdAppId.className = "p-3 font-mono font-bold text-gold-400";
+                tdAppId.textContent = s.appId;
+
+                const tdName = document.createElement('td');
+                tdName.className = "p-3 font-medium";
+                tdName.textContent = `${s.prefix}${s.firstName} ${s.lastName}`;
+
+                const tdTime = document.createElement('td');
+                tdTime.className = "p-3 text-amber-300 font-sarabun";
+                tdTime.textContent = s.time;
+
+                const tdRoom = document.createElement('td');
+                tdRoom.className = "p-3 text-center";
+                const spanRoom = document.createElement('span');
+                spanRoom.className = "px-2 py-0.5 bg-rose-900/60 text-rose-200 rounded font-bold";
+                spanRoom.textContent = s.room;
+                tdRoom.appendChild(spanRoom);
+
+                const tdAction = document.createElement('td');
+                tdAction.className = "p-3 text-center";
+
+                const btnGroup = document.createElement('div');
+                btnGroup.className = "flex justify-center gap-2";
+
+                const btnEdit = document.createElement('button');
+                btnEdit.className = "text-amber-400 hover:text-amber-300";
+                btnEdit.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
+                btnEdit.addEventListener('click', () => editStudent(s.appId));
+
+                const btnDel = document.createElement('button');
+                btnDel.className = "text-rose-400 hover:text-rose-300";
+                btnDel.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+                btnDel.addEventListener('click', () => confirmDeleteStudent(s.appId));
+
+                btnGroup.appendChild(btnEdit);
+                btnGroup.appendChild(btnDel);
+                tdAction.appendChild(btnGroup);
+
+                tr.appendChild(tdNo);
+                tr.appendChild(tdAppId);
+                tr.appendChild(tdName);
+                tr.appendChild(tdTime);
+                tr.appendChild(tdRoom);
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Student Admin CRUD Handlers
+        function openAddStudentModal() {
+            document.getElementById('modalTitle').textContent = "เพิ่มข้อมูลผู้สมัครสัมภาษณ์";
+            document.getElementById('editAppId').value = "";
+            document.getElementById('modalAppId').value = "";
+            document.getElementById('modalAppId').disabled = false;
+            document.getElementById('modalPrefix').value = "นางสาว";
+            document.getElementById('modalFirstName').value = "";
+            document.getElementById('modalLastName').value = "";
+            document.getElementById('modalTime').value = "9.00 - 9.20 น.";
+            document.getElementById('modalRoom').value = "ห้อง A";
+            document.getElementById('modalCommittee').value = "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม";
+            document.getElementById('studentModal').classList.remove('hidden');
+        }
+
+        function editStudent(appId) {
+            const s = window.appData.students.find(x => x.appId === appId);
+            if (!s) return;
+
+            document.getElementById('modalTitle').textContent = "แก้ไขข้อมูลผู้สมัครสัมภาษณ์";
+            document.getElementById('editAppId').value = s.appId;
+            document.getElementById('modalAppId').value = s.appId;
+            document.getElementById('modalAppId').disabled = true;
+            document.getElementById('modalPrefix').value = s.prefix;
+            document.getElementById('modalFirstName').value = s.firstName;
+            document.getElementById('modalLastName').value = s.lastName;
+            document.getElementById('modalTime').value = s.time;
+            document.getElementById('modalRoom').value = s.room;
+            document.getElementById('modalCommittee').value = s.committee;
+            document.getElementById('studentModal').classList.remove('hidden');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        async function saveStudentModal() {
+            if (!window.isAdminMode || !supabaseClient) {
+                showToast("ไม่มีสิทธิ์ดำเนินการ (Admin Access Required)", "error");
+                return;
+            }
+
+            const editId = document.getElementById('editAppId').value;
+            const appId = document.getElementById('modalAppId').value.trim();
+            const prefix = document.getElementById('modalPrefix').value.trim();
+            const firstName = document.getElementById('modalFirstName').value.trim();
+            const lastName = document.getElementById('modalLastName').value.trim();
+            const time = document.getElementById('modalTime').value.trim();
+            const room = document.getElementById('modalRoom').value.trim();
+            const committee = document.getElementById('modalCommittee').value.trim();
+
+            if (!appId || !firstName || !lastName) {
+                showToast("โปรดกรอกเลขที่สมัคร ชื่อ และนามสกุล ให้ครบถ้วน", "error");
+                return;
+            }
+
+            if (editId) {
+                // Update Existing Candidate
+                const { error } = await supabaseClient.from('students').update({
+                    prefix,
+                    first_name: firstName,
+                    last_name: lastName,
+                    time_slot: time,
+                    room: room,
+                    committee: committee
+                }).eq('app_id', editId);
+
+                if (error) {
+                    showToast("ไม่สามารถอัปเดตข้อมูล: " + error.message, "error");
+                    return;
+                }
+
+                await insertAuditLog("แก้ไขรายชื่อ", `แก้ไขผู้สมัครเลขที่ ${appId}`);
+                showToast("แก้ไขข้อมูลผู้สมัครเรียบร้อย", "success");
+            } else {
+                // Duplicate App ID Check
+                const { data: existing } = await supabaseClient
+                    .from('students')
+                    .select('app_id')
+                    .eq('app_id', appId)
+                    .maybeSingle();
+
+                if (existing) {
+                    showToast(`เลขที่สมัคร ${appId} มีอยู่ในระบบแล้ว`, "error");
+                    return;
+                }
+
+                const nextNo = window.appData.students.length + 1;
+                const { error } = await supabaseClient.from('students').insert({
+                    app_id: appId,
+                    no: nextNo,
+                    prefix: prefix,
+                    first_name: firstName,
+                    last_name: lastName,
+                    time_slot: time,
+                    room: room,
+                    committee: committee
+                });
+
+                if (error) {
+                    showToast("ไม่สามารถเพิ่มผู้สมัครใหม่: " + error.message, "error");
+                    return;
+                }
+
+                await insertAuditLog("เพิ่มรายชื่อ", `เพิ่มผู้สมัครใหม่ ${prefix}${firstName} ${lastName} (${appId})`);
+                showToast("เพิ่มข้อมูลผู้สมัครใหม่เรียบร้อย", "success");
+            }
+
+            closeStudentModal();
+            await fetchAdminStudentsFromSupabase();
+        }
+
+        function confirmDeleteStudent(appId) {
+            const s = window.appData.students.find(x => x.appId === appId);
+            if (!s) return;
+
+            showConfirmModal(
+                "ยืนยันการลบผู้สมัคร",
+                `คุณต้องการลบข้อมูลของ ${s.prefix}${s.firstName} ${s.lastName} (${s.appId}) ออกจากฐานข้อมูลหรือไม่?`,
+                async () => {
+                    if (!window.isAdminMode || !supabaseClient) {
+                        showToast("ไม่มีสิทธิ์ดำเนินการ", "error");
+                        return;
+                    }
+
+                    const { error } = await supabaseClient.from('students').delete().eq('app_id', appId);
+                    if (error) {
+                        showToast("ไม่สามารถลบข้อมูล: " + error.message, "error");
+                        return;
+                    }
+
+                    await insertAuditLog("ลบรายชื่อ", `ลบผู้สมัครเลขที่ ${appId}`);
+                    showToast("ลบข้อมูลผู้สมัครเรียบร้อย", "info");
+                    closeConfirmModal();
+                    await fetchAdminStudentsFromSupabase();
+                }
+            );
+        }
+
+        function showConfirmModal(title, message, onExecute) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            
+            const btnEl = document.getElementById('confirmExecuteBtn');
+            btnEl.onclick = async () => {
+                await onExecute();
+            };
+
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        // RFC 4180 Standard CSV Parser
+        function parseCSV(text) {
+            const result = [];
+            let row = [];
+            let inQuotes = false;
+            let currentStr = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentStr += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentStr.trim());
+                    currentStr = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') {
+                        i++;
+                    }
+                    row.push(currentStr.trim());
+                    if (row.some(field => field !== '')) {
+                        result.push(row);
+                    }
+                    row = [];
+                    currentStr = '';
+                } else {
+                    currentStr += char;
+                }
+            }
+
+            if (currentStr || row.length > 0) {
+                row.push(currentStr.trim());
+                if (row.some(field => field !== '')) {
+                    result.push(row);
+                }
+            }
+
+            return result;
+        }
+
+        // Robust CSV Import Engine
+        function handleCSVImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const text = e.target.result;
+                const rows = parseCSV(text);
+
+                if (rows.length < 2) {
+                    showToast("ไฟล์ CSV ไม่มีข้อมูลเพียงพอ (ต้องมีส่วนหัวและข้อมูลอย่างน้อย 1 แถว)", "error");
+                    return;
+                }
+
+                // Verify CSV Header
+                const headers = rows[0].map(h => h.toLowerCase());
+                const requiredFields = ["เลขที่สมัคร", "ชื่อ", "นามสกุล"];
+                const hasRequiredHeader = requiredFields.every(req => 
+                    headers.some(h => h.includes(req) || h.includes("app_id") || h.includes("first_name") || h.includes("last_name"))
+                );
+
+                if (!hasRequiredHeader) {
+                    showToast("รูปแบบหัวตาราง CSV ไม่ถูกต้อง (ต้องมี เลขที่สมัคร, ชื่อ, นามสกุล)", "error");
+                    return;
+                }
+
+                pendingImportData = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i];
+                    if (cols.length >= 3) {
+                        const appId = cols[1] || cols[0];
+                        const firstName = cols[3] || cols[2];
+                        const lastName = cols[4] || cols[3];
+
+                        if (appId && firstName && lastName) {
+                            pendingImportData.push({
+                                no: parseInt(cols[0]) || i,
+                                app_id: appId,
+                                prefix: cols[2] || '',
+                                first_name: firstName,
+                                last_name: lastName,
+                                time_slot: cols[5] || '9.00 - 9.20 น.',
+                                room: cols[6] || 'ห้อง A',
+                                committee: cols[7] || ''
+                            });
+                        }
+                    }
+                }
+
+                if (pendingImportData.length === 0) {
+                    showToast("ไม่พบข้อมูลผู้สมัครที่ถูกต้องในไฟล์ CSV", "error");
+                    return;
+                }
+
+                document.getElementById('csvImportSummary').textContent = `พบข้อมูลผู้สมัครในไฟล์ CSV ที่พร้อมนำเข้าจำนวน ${pendingImportData.length} รายการ`;
+                document.getElementById('csvImportModal').classList.remove('hidden');
+                event.target.value = '';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function closeCsvModal() {
+            document.getElementById('csvImportModal').classList.add('hidden');
+            pendingImportData = [];
+        }
+
+        async function executeCSVImport() {
+            if (!window.isAdminMode || !supabaseClient) {
+                showToast("ไม่มีสิทธิ์ดำเนินการ (Admin Access Required)", "error");
+                return;
+            }
+
+            const mode = document.querySelector('input[name="importMode"]:checked')?.value || 'append';
+            let successCount = 0;
+            let errorCount = 0;
+
+            if (mode === 'append') {
+                const existingAppIds = new Set(window.appData.students.map(s => s.appId));
+                const newRecords = pendingImportData.filter(d => !existingAppIds.has(d.app_id));
+
+                if (newRecords.length === 0) {
+                    showToast("รายการทั้งหมดในไฟล์มีอยู่ในระบบแล้ว ไม่มีการเพิ่มข้อมูลใหม่", "info");
+                    closeCsvModal();
+                    return;
+                }
+
+                const { error } = await supabaseClient.from('students').insert(newRecords);
+                if (error) {
+                    showToast("นำเข้าข้อมูลล้มเหลว: " + error.message, "error");
+                    return;
+                }
+                successCount = newRecords.length;
+            } else if (mode === 'update') {
+                const existingAppIds = new Set(window.appData.students.map(s => s.appId));
+                const updateRecords = pendingImportData.filter(d => existingAppIds.has(d.app_id));
+
+                if (updateRecords.length === 0) {
+                    showToast("ไม่พบรายการที่มีอยู่เดิมตรงกับในไฟล์ CSV", "info");
+                    closeCsvModal();
+                    return;
+                }
+
+                for (const rec of updateRecords) {
+                    const { error } = await supabaseClient.from('students').update({
+                        prefix: rec.prefix,
+                        first_name: rec.first_name,
+                        last_name: rec.last_name,
+                        time_slot: rec.time_slot,
+                        room: rec.room,
+                        committee: rec.committee
+                    }).eq('app_id', rec.app_id);
+
+                    if (!error) successCount++;
+                    else errorCount++;
+                }
+            }
+
+            await insertAuditLog("นำเข้า CSV", `นำเข้าข้อมูลแบบ ${mode} สำเร็จ ${successCount} รายการ (ข้อผิดพลาด ${errorCount} รายการ)`);
+            showToast(`นำเข้าข้อมูลสำเร็จ ${successCount} รายการ ${errorCount > 0 ? `(ข้อผิดพลาด ${errorCount} รายการ)` : ''}`, "success");
+            closeCsvModal();
+            await fetchAdminStudentsFromSupabase();
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            if (!window.isAdminMode || window.appData.students.length === 0) {
+                showToast("ไม่มีข้อมูลผู้สมัครสำหรับส่งออก", "error");
+                return;
+            }
+
+            const headers = ["ลำดับ", "เลขที่สมัคร", "คำนำหน้า", "ชื่อ", "นามสกุล", "ลำดับเวลาสัมภาษณ์", "ห้องสัมภาษณ์", "คณะกรรมการสัมภาษณ์"];
+            const rows = window.appData.students.map(s => [
+                s.no || '',
+                `"${s.appId.replace(/"/g, '""')}"`,
+                `"${(s.prefix || '').replace(/"/g, '""')}"`,
+                `"${(s.firstName || '').replace(/"/g, '""')}"`,
+                `"${(s.lastName || '').replace(/"/g, '""')}"`,
+                `"${(s.time || '').replace(/"/g, '""')}"`,
+                `"${(s.room || '').replace(/"/g, '""')}"`,
+                `"${(s.committee || '').replace(/\n/g, ' ').replace(/"/g, '""')}"`
+            ]);
+
+            const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `TCAS1.2_Interview_Students_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast("ส่งออกไฟล์ CSV เรียบร้อยแล้ว", "success");
+        }
+
+        // Real Database Audit Logs Helper
+        async function insertAuditLog(action, details) {
+            if (!supabaseClient || !window.isAdminMode || !window.currentAdminUser) return;
+
+            const performedBy = window.currentAdminUser.email || 'Admin';
+            const { error } = await supabaseClient
+                .from('audit_logs')
+                .insert({
+                    action: action,
+                    details: details,
+                    performed_by: performedBy
+                });
+
+            if (error) {
+                console.warn("Failed to write audit log to database:", error.message);
+            } else {
+                await fetchAdminLogsFromSupabase();
+            }
+        }
+
+        function renderAuditLogs() {
+            const container = document.getElementById('adminAuditLogs');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (window.appData.logs.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = "text-slate-500 text-center py-2";
+                emptyDiv.textContent = window.isAdminMode ? "ไม่มีประวัติการบันทึก" : "ต้องเข้าสู่ระบบแอดมินเพื่อดูประวัติ";
+                container.appendChild(emptyDiv);
+                return;
+            }
+
+            window.appData.logs.forEach(l => {
+                const item = document.createElement('div');
+                item.className = "p-2 bg-slate-900 rounded border border-slate-800 flex justify-between items-center";
+
+                const left = document.createElement('div');
+                const badge = document.createElement('span');
+                badge.className = "font-bold text-amber-400";
+                badge.textContent = `[${l.action}] `;
+
+                const desc = document.createElement('span');
+                desc.className = "text-slate-300 ml-1";
+                desc.textContent = l.details;
+
+                left.appendChild(badge);
+                left.appendChild(desc);
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = "text-[10px] text-slate-500 font-mono";
+                timeSpan.textContent = l.time;
+
+                item.appendChild(left);
+                item.appendChild(timeSpan);
+                container.appendChild(item);
+            });
+        }
+
+        function renderUIComponents() {
+            updateZoomDisplay();
+            renderCommitteeCards();
+            renderAdminStudentTable();
+            renderAuditLogs();
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMsg');
+
+            msg.textContent = message;
+
+            if (type === 'success') {
+                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+            } else if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-base';
+            } else {
+                icon.className = 'fa-solid fa-circle-info text-amber-400 text-base';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+
+        function copyZoomMeetingInfo() {
+            const z = window.appData.zoomConfig;
+            const text = `Topic: ${z.topic}\nMeeting ID: ${z.meetingId}\nZoom Link: ${z.zoomUrl}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("คัดลอกรายละเอียด Meeting ID เรียบร้อยแล้ว", "success");
+            }).catch(() => {
+                showToast("ไม่สามารถคัดลอกข้อมูลได้", "error");
+            });
+        }
+
+        // Attach DOM Listeners on Load (No inline dynamic JS execution)
+        document.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+
+            // Navigation Button Listeners
+            document.getElementById('brandBtn')?.addEventListener('click', () => showTab('home'));
+            document.getElementById('nav-home')?.addEventListener('click', () => showTab('home'));
+            document.getElementById('nav-schedule')?.addEventListener('click', () => showTab('schedule'));
+            document.getElementById('nav-online-info')?.addEventListener('click', () => showTab('online-info'));
+            document.getElementById('nav-committee')?.addEventListener('click', () => showTab('committee'));
+            document.getElementById('ctaSearchBtn')?.addEventListener('click', () => showTab('schedule'));
+            document.getElementById('ctaInfoBtn')?.addEventListener('click', () => showTab('online-info'));
+            document.getElementById('contactStaffBtn')?.addEventListener('click', () => showTab('online-info'));
+
+            // Admin Actions
+            document.getElementById('adminToggleBtn')?.addEventListener('click', handleAdminAuthButton);
+            document.getElementById('adminSignOutBtn')?.addEventListener('click', handleAdminAuthButton);
+            document.getElementById('cancelAdminLoginBtn')?.addEventListener('click', closeAdminLoginModal);
+            document.getElementById('adminLoginForm')?.addEventListener('submit', handleAdminLogin);
+            
+            // Search Actions
+            document.getElementById('searchForm')?.addEventListener('submit', handleSearch);
+            document.getElementById('resetSearchBtn')?.addEventListener('click', resetSearch);
+            document.getElementById('clearBtn')?.addEventListener('click', resetSearch);
+
+            // Copy Meeting ID Listeners
+            document.getElementById('copyMeetingIdBtn')?.addEventListener('click', copyZoomMeetingInfo);
+            document.getElementById('copyZoomInfoBtn')?.addEventListener('click', copyZoomMeetingInfo);
+
+            // Student Modal Actions
+            document.getElementById('openAddStudentBtn')?.addEventListener('click', openAddStudentModal);
+            document.getElementById('cancelStudentModalBtn')?.addEventListener('click', closeStudentModal);
+            document.getElementById('saveStudentModalBtn')?.addEventListener('click', saveStudentModal);
+
+            // Zoom Config Actions
+            document.getElementById('saveZoomConfigBtn')?.addEventListener('click', saveZoomConfig);
+            document.getElementById('closeSqlHelpBtn')?.addEventListener('click', () => {
+                document.getElementById('sqlHelpBox').classList.add('hidden');
+            });
+
+            // Confirm Modal Actions
+            document.getElementById('confirmCancelBtn')?.addEventListener('click', closeConfirmModal);
+
+            // CSV Actions
+            document.getElementById('selectCsvBtn')?.addEventListener('click', () => {
+                document.getElementById('csvFileInput').click();
+            });
+            document.getElementById('csvFileInput')?.addEventListener('change', handleCSVImport);
+            document.getElementById('cancelCsvBtn')?.addEventListener('click', closeCsvModal);
+            document.getElementById('executeCsvBtn')?.addEventListener('click', executeCSVImport);
+            document.getElementById('exportCsvBtn')?.addEventListener('click', exportToCSV);
+
+            // Search Input Listener
+            document.getElementById('searchInput')?.addEventListener('input', function(e) {
+                const clearBtn = document.getElementById('clearBtn');
+                if (e.target.value.trim() !== '') {
+                    clearBtn?.classList.remove('hidden');
+                } else {
+                    clearBtn?.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
