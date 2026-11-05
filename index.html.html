@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCAS 1.2 Interview Portal - Medical Technology International Program | Walailak University</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Prompt & Sarabun -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Official Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        maroon: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                            950: '#4c0519',
+                        },
+                        gold: {
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                        }
+                    },
+                    fontFamily: {
+                        prompt: ['Prompt', 'sans-serif'],
+                        sarabun: ['Sarabun', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #fcfcfd;
+        }
+        .maroon-gradient {
+            background: linear-gradient(135deg, #4c0519 0%, #881337 50%, #9f1239 100%);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #facc15 0%, #eab308 50%, #ca8a04 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(241, 245, 249, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 bg-slate-50/50">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-maroon-950 text-gold-400 text-xs py-2 px-4 text-center font-medium border-b border-gold-500/20 flex justify-between items-center max-w-7xl mx-auto w-full">
+        <div class="flex items-center gap-2 mx-auto sm:mx-0">
+            <span id="cloudStatus" class="inline-flex items-center gap-1.5 text-amber-400">
+                <i class="fa-solid fa-cloud-sun animate-pulse"></i> Supabase Engine Connected
+            </span>
+            <span class="hidden md:inline">| ระบบแจ้งลำดับการสัมภาษณ์ออนไลน์ TCAS 1.2 ปีการศึกษา 2569</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-4 text-slate-300 text-xs">
+            <span><i class="fa-solid fa-graduation-cap text-gold-400 mr-1"></i> มหาวิทยาลัยวลัยลักษณ์</span>
+            <button onclick="toggleAdminMode()" id="adminToggleBtn" class="text-gold-400 hover:text-gold-300 font-semibold underline flex items-center gap-1 transition">
+                <i class="fa-solid fa-shield-halved text-xs"></i> <span id="adminToggleText">เจ้าหน้าที่ (Admin)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="maroon-gradient text-white shadow-xl relative overflow-hidden sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:py-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Branding Logo & Title -->
+            <div class="flex items-center gap-3.5 cursor-pointer" onclick="showTab('home')">
+                <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white p-1.5 shadow-lg flex items-center justify-center shrink-0 border-2 border-gold-400">
+                    <div class="w-full h-full rounded-xl bg-maroon-900 flex items-center justify-center text-gold-400 font-bold text-xl">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-xs md:text-sm text-gold-300 font-semibold tracking-wide uppercase">
+                        Walailak University • School of Allied Health Sciences
+                    </div>
+                    <h1 class="text-lg md:text-2xl font-bold tracking-tight text-white leading-tight">
+                        Medical Technology <span class="text-gold-400 font-normal">(International Program)</span>
+                    </h1>
+                    <p class="text-xs text-rose-100 font-light">TCAS 1.2 Interview Portal 2026</p>
+                </div>
+            </div>
+
+            <!-- Header Navigation Buttons -->
+            <nav class="flex flex-wrap justify-center gap-1.5 bg-black/20 p-1.5 rounded-xl border border-white/10 text-xs md:text-sm">
+                <button onclick="showTab('home')" id="nav-home" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 bg-white/20 text-white shadow">
+                    <i class="fa-solid fa-house"></i> หน้าแรก
+                </button>
+                <button onclick="showTab('schedule')" id="nav-schedule" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-100 hover:bg-white/10">
+                    <i class="fa-solid fa-magnifying-glass"></i> ค้นหาตารางสัมภาษณ์
+                </button>
+                <button onclick="showTab('online-info')" id="nav-online-info" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-100 hover:bg-white/10">
+                    <i class="fa-solid fa-video"></i> การสัมภาษณ์ออนไลน์
+                </button>
+                <button onclick="showTab('committee')" id="nav-committee" class="nav-btn px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-100 hover:bg-white/10">
+                    <i class="fa-solid fa-user-tie"></i> คณะกรรมการ
+                </button>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 relative z-20">
+
+        <!-- ==================== TAB 1: HOME PAGE ==================== -->
+        <section id="tab-home" class="tab-content space-y-8">
+            
+            <!-- Hero Highlight Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl border-2 border-gold-400/40 relative overflow-hidden bg-gradient-to-br from-white via-rose-50/30 to-amber-50/20">
+                <div class="absolute -right-10 -bottom-10 opacity-5 text-maroon-900 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                
+                <div class="max-w-2xl relative z-10">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 bg-maroon-900 text-gold-400 rounded-full text-xs font-semibold mb-4 shadow-sm border border-gold-500/30">
+                        <i class="fa-solid fa-star text-gold-400"></i> ประกาศสำคัญสำหรับผู้สมัคร TCAS 1.2
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight mb-4">
+                        ยินดีต้อนรับผู้สมัครสอบสัมภาษณ์ <br>
+                        <span class="text-maroon-900">หลักสูตรเทคนิคการแพทย์ (นานาชาติ)</span>
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base mb-8 leading-relaxed font-sarabun">
+                        สำนักวิชาสหเวชศาสตร์ มหาวิทยาลัยวลัยลักษณ์ ขอแจ้งกำหนดการและรายละเอียดการสอบสัมภาษณ์ออนไลน์ สำหรับผู้สมัครเข้าศึกษาต่อในระดับปริญญาตรี รอบ TCAS 1.2 ประจำปีการศึกษา 2569
+                    </p>
+
+                    <!-- Date & Time Highlight Box -->
+                    <div class="bg-maroon-900 text-white rounded-2xl p-5 sm:p-6 mb-8 shadow-lg border-l-4 border-gold-400 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-gold-400 text-xl shrink-0">
+                                <i class="fa-regular fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-rose-200">วันสอบสัมภาษณ์</div>
+                                <div class="text-base sm:text-lg font-bold text-white">วันเสาร์ที่ 7 พฤศจิกายน 2569</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
+                            <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-gold-400 text-xl shrink-0">
+                                <i class="fa-regular fa-clock"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-rose-200">เวลาเริ่มสัมภาษณ์</div>
+                                <div class="text-base sm:text-lg font-bold text-gold-400">09.00 น. เป็นต้นไป</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="showTab('schedule')" class="flex-1 maroon-gradient hover:opacity-95 text-white font-semibold py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition flex items-center justify-center gap-3 group text-base">
+                            <i class="fa-solid fa-magnifying-glass text-gold-400 group-hover:scale-110 transition"></i>
+                            <span>ตรวจสอบตารางสัมภาษณ์</span>
+                        </button>
+                        <button onclick="showTab('online-info')" class="flex-1 bg-white hover:bg-slate-50 text-maroon-900 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-200 shadow-md hover:shadow-lg transition flex items-center justify-center gap-3 text-base">
+                            <i class="fa-solid fa-video text-maroon-700"></i>
+                            <span>ข้อมูลการสัมภาษณ์ออนไลน์</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Features Quick Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-rose-50 text-maroon-800 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base mb-2">ความเป็นส่วนตัวสูง</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sarabun">
+                        นักเรียนสามารถค้นหาตารางและห้องสัมภาษณ์ได้เฉพาะตนเองโดยใช้เลขที่สมัครหรือชื่อ-สกุล เพื่อความเป็นส่วนตัว
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-gold-600 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base mb-2">เข้าห้อง Zoom ในคลิกเดียว</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sarabun">
+                        มีปุ่มเชื่อมต่อไปยัง Zoom Meeting และคัดลอก Meeting ID ได้อย่างรวดเร็ว ป้องกันการเข้าผิดห้อง
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base mb-2">Supabase Cloud Storage</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sarabun">
+                        ระบบบันทึกข้อมูลถาวรผ่าน Supabase Database เข้าถึงและอัปเดตได้แบบ Real-time ทุกอุปกรณ์
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 2: SCHEDULE SEARCH PAGE ==================== -->
+        <section id="tab-schedule" class="tab-content hidden space-y-6">
+            
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">ค้นหาตารางสัมภาษณ์ส่วนบุคคล</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-sarabun mt-1">กรอกเลขที่สมัคร หรือชื่อ-นามสกุล ของท่านเพื่อตรวจสอบลำดับ เวลา และห้องสัมภาษณ์</p>
+            </div>
+
+            <!-- Search Card Box -->
+            <div class="glass-card rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto border border-slate-200">
+                <form onsubmit="handleSearch(event)" class="space-y-4">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        ค้นหาด้วยเลขที่สมัคร / ชื่อ หรือ นามสกุล
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                        </div>
+                        <input type="text" id="searchInput" 
+                            class="w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-300 rounded-2xl text-base sm:text-lg font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-maroon-800 focus:bg-white transition shadow-inner"
+                            placeholder="เช่น 17000218 หรือ พุทธิดา...">
+                        <button type="button" onclick="clearSearch()" id="clearBtn" class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-circle-xmark text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button type="submit" class="flex-1 maroon-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-base">
+                            <i class="fa-solid fa-search"></i> ค้นหาข้อมูล
+                        </button>
+                        <button type="button" onclick="resetSearch()" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl transition text-sm">
+                            ล้างค่า
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="searchLoading" class="hidden text-center py-12">
+                <div class="inline-block w-10 h-10 border-4 border-maroon-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-sm font-medium text-slate-600">กำลังค้นหาข้อมูลจาก Supabase Database...</p>
+            </div>
+
+            <!-- Search Not Found Message -->
+            <div id="searchNotFound" class="hidden glass-card max-w-2xl mx-auto rounded-2xl p-8 text-center border-2 border-rose-200 bg-rose-50/50">
+                <div class="w-16 h-16 bg-rose-100 text-maroon-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">ไม่พบข้อมูลการสัมภาษณ์</h3>
+                <p class="text-xs sm:text-sm text-slate-600 font-sarabun mb-4">
+                    โปรดตรวจสอบเลขที่สมัคร (8 หลัก) หรือสะกดชื่อ-นามสกุลใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่หากมั่นใจว่ามีสิทธิ์สัมภาษณ์
+                </p>
+                <button onclick="showTab('online-info')" class="text-xs text-maroon-900 font-bold underline hover:text-maroon-700">
+                    <i class="fa-solid fa-headset mr-1"></i> ติดต่อเจ้าหน้าที่ผู้ประสานงาน
+                </button>
+            </div>
+
+            <!-- PERSONAL INTERVIEW CARD (SINGLE RESULT VIEW) -->
+            <div id="personalCard" class="hidden max-w-3xl mx-auto glass-card border-2 border-gold-400 rounded-3xl shadow-2xl overflow-hidden bg-white">
+                
+                <!-- Card Header -->
+                <div class="maroon-gradient text-white p-6 sm:p-8 relative">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div>
+                            <span class="inline-block px-3 py-1 bg-gold-400 text-maroon-950 font-extrabold text-xs rounded-full uppercase mb-2 shadow-sm">
+                                Verified Candidate Profile
+                            </span>
+                            <h3 id="cardFullName" class="text-2xl sm:text-3xl font-bold tracking-wide"></h3>
+                            <p class="text-xs text-rose-200 font-sarabun mt-1">หลักสูตรเทคนิคการแพทย์ (นานาชาติ) • รอบ TCAS 1.2</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-right sm:text-right shrink-0">
+                            <div class="text-xs text-rose-200">เลขที่สมัคร (App No.)</div>
+                            <div id="cardAppId" class="text-xl font-mono font-bold text-gold-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Interview Details Grid -->
+                <div class="p-6 sm:p-8 space-y-6">
+                    
+                    <!-- TIME & ROOM HIGHLIGHT -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Time Slot Box -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50/50 p-6 rounded-2xl border-2 border-amber-300/70 shadow-sm text-center">
+                            <div class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-regular fa-clock text-amber-600 text-base"></i> ลำดับเวลาสัมภาษณ์
+                            </div>
+                            <div id="cardTime" class="text-2xl sm:text-3xl font-black text-amber-900 tracking-tight my-1"></div>
+                            <div class="text-xs text-amber-700/80 font-sarabun">7 พฤศจิกายน 2569</div>
+                        </div>
+
+                        <!-- Interview Room Box -->
+                        <div class="bg-gradient-to-br from-rose-50 to-red-50/50 p-6 rounded-2xl border-2 border-rose-300/70 shadow-sm text-center">
+                            <div class="text-xs font-bold text-maroon-800 uppercase tracking-wider mb-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-door-open text-maroon-700 text-base"></i> ห้องสัมภาษณ์
+                            </div>
+                            <div id="cardRoom" class="text-2xl sm:text-3xl font-black text-maroon-950 tracking-tight my-1"></div>
+                            <div class="text-xs text-maroon-800/80 font-sarabun">ระบบสัมภาษณ์ Zoom Online</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Additional Details Table List -->
+                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 divide-y divide-slate-200/80 text-xs sm:text-sm">
+                        <div class="py-2.5 flex justify-between items-center">
+                            <span class="text-slate-500 font-medium">ลำดับที่ (No.)</span>
+                            <span id="cardNo" class="font-bold text-slate-800"></span>
+                        </div>
+                        <div class="py-2.5 flex justify-between items-center">
+                            <span class="text-slate-500 font-medium">สถานะสิทธิ์การสัมภาษณ์</span>
+                            <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs">
+                                <i class="fa-solid fa-circle-check mr-1"></i> มีสิทธิ์เข้ารับการสัมภาษณ์
+                            </span>
+                        </div>
+                        <div class="py-2.5 flex justify-between items-start">
+                            <span class="text-slate-500 font-medium shrink-0 pt-0.5">คณะกรรมการสัมภาษณ์</span>
+                            <span id="cardCommittee" class="font-medium text-slate-800 text-right whitespace-pre-line font-sarabun"></span>
+                        </div>
+                    </div>
+
+                    <!-- Direct Zoom Button Action -->
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <a id="cardZoomLink" href="#" target="_blank" class="flex-1 maroon-gradient hover:opacity-95 text-white font-bold py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition flex items-center justify-center gap-2.5 text-base">
+                            <i class="fa-solid fa-video text-gold-400 text-xl"></i>
+                            <span>เปิดแอปพลิเคชัน ZOOM เพื่อเข้าสัมภาษณ์</span>
+                        </a>
+                        <button onclick="copyZoomMeetingInfo()" class="px-5 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl border border-slate-300 transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-regular fa-copy"></i> คัดลอก Meeting ID
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 3: ONLINE INTERVIEW INFO ==================== -->
+        <section id="tab-online-info" class="tab-content hidden space-y-8">
+            
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">ข้อมูลการสัมภาษณ์ออนไลน์ (Zoom Meeting)</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-sarabun mt-1">รายละเอียดลิงก์ Zoom และคำแนะนำสำหรับการสอบสัมภาษณ์ออนไลน์</p>
+            </div>
+
+            <!-- Zoom Info Main Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    
+                    <!-- Left: Meeting Details -->
+                    <div class="md:col-span-2 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-rose-100 text-maroon-900 rounded-full text-xs font-semibold">
+                            <i class="fa-solid fa-video text-maroon-700"></i> Official Zoom Room
+                        </div>
+
+                        <h3 id="displayZoomTopic" class="text-xl sm:text-2xl font-bold text-slate-900">
+                            Topic: สัมภาษณ์ TCAS 1.2
+                        </h3>
+
+                        <div class="space-y-2 text-xs sm:text-sm font-sarabun text-slate-600">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-calendar text-maroon-800 w-5"></i>
+                                <span><strong>Date:</strong> <span id="displayZoomDate">November 7, 2026</span></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-maroon-800 w-5"></i>
+                                <span><strong>Time:</strong> <span id="displayZoomTime">08:30 AM (Bangkok Time)</span></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-hashtag text-maroon-800 w-5"></i>
+                                <span><strong>Meeting ID:</strong> <span id="displayZoomId" class="font-mono font-bold text-slate-800 text-base">991 5540 2901</span></span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                            <a id="displayZoomBtn" href="https://zoom.us/j/99155402901" target="_blank" class="maroon-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition inline-flex items-center justify-center gap-2 text-sm">
+                                <i class="fa-solid fa-right-to-bracket text-gold-400"></i> Join Zoom Meeting
+                            </a>
+                            <button onclick="copyZoomMeetingInfo()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3.5 px-5 rounded-xl border border-slate-300 transition text-sm">
+                                <i class="fa-regular fa-copy mr-1"></i> คัดลอกรายละเอียด
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: LINE Group QR Code Box -->
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-200 text-center flex flex-col items-center justify-center">
+                        <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">
+                            <i class="fa-brands fa-line text-emerald-600 text-lg mr-1"></i> กลุ่ม LINE ผู้สัมภาษณ์
+                        </div>
+                        
+                        <!-- QR Code Frame -->
+                        <div class="w-36 h-36 bg-white p-2 rounded-xl shadow-md border border-emerald-200 mb-3 flex items-center justify-center overflow-hidden">
+                            <img id="displayLineQr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://line.me/R/ti/g/tcas12-mt-wu" alt="Line QR Code" class="w-full h-full object-contain">
+                        </div>
+                        
+                        <p class="text-[11px] text-emerald-700 font-sarabun">สแกนเพื่อเข้ากลุ่ม LINE สอบถามเจ้าหน้าที่</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Guidelines Checklist -->
+            <div class="max-w-4xl mx-auto bg-amber-50/80 border border-amber-200 rounded-3xl p-6 sm:p-8">
+                <h3 class="font-bold text-amber-900 text-base sm:text-lg mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-amber-600"></i> คำแนะนำและข้อปฏิบัติในการเข้าสัมภาษณ์ออนไลน์
+                </h3>
+                <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-amber-900/90 font-sarabun leading-relaxed">
+                    <li>ผู้สมัครควรเตรียมตัวเข้าห้อง Zoom ล่วงหน้าก่อนถึงลำดับเวลาสัมภาษณ์ของตนเองอย่างน้อย <strong>15-20 นาที</strong></li>
+                    <li>เมื่อเข้าห้อง Zoom โปรดตั้งชื่อ Display Name เป็น <strong>"ลำดับที่_ชื่อ-นามสกุล"</strong> (เช่น 01_พุทธิดา พรมจันทร์)</li>
+                    <li>โปรดเปิดกล้องและไมโครโฟน พร้อมเตรียม <strong>บัตรประชาชน หรือ บัตรนักเรียน</strong> เพื่อแสดงยืนยันตัวตนก่อนการสัมภาษณ์</li>
+                    <li>เตรียมสถานที่ที่มีสัญญาณอินเทอร์เน็ตเสถียร เงียบสงบ และไม่มีเสียงรบกวนภายนอก</li>
+                </ol>
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 4: COMMITTEE PAGE ==================== -->
+        <section id="tab-committee" class="tab-content hidden space-y-8">
+            
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">คณะกรรมการสอบสัมภาษณ์</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-sarabun mt-1">คณาจารย์ผู้ทรงคุณวุฒิ หลักสูตรเทคนิคการแพทย์ (นานาชาติ) มหาวิทยาลัยวลัยลักษณ์</p>
+            </div>
+
+            <!-- Committee Cards Container -->
+            <div id="committeeContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Dynamic Committee Cards rendered by JS -->
+            </div>
+
+        </section>
+
+        <!-- ==================== ADMIN DASHBOARD PANEL (SUPABASE DATABASE MANAGER) ==================== -->
+        <section id="admin-panel" class="hidden space-y-8 bg-slate-900 text-white -mx-4 p-6 sm:p-8 rounded-3xl mt-6 shadow-2xl border border-slate-800">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
+                <div>
+                    <span class="px-3 py-1 bg-gold-400 text-slate-950 font-bold text-xs rounded-full">Supabase Cloud Control</span>
+                    <h2 class="text-2xl font-bold text-white mt-1">ระบบจัดการข้อมูล Supabase Database</h2>
+                    <p class="text-xs text-slate-400">เชื่อมต่อและจัดเก็บข้อมูลถาวรบน Cloud แบบ Real-time</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportToCSV()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-file-excel"></i> ส่งออก CSV
+                    </button>
+                    <button onclick="toggleAdminMode()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-xmark mr-1"></i> ปิดโหมด Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Supabase Config Setup Bar -->
+            <div class="bg-slate-950 p-5 rounded-2xl border border-amber-500/30 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-gold-400 flex items-center gap-2">
+                        <i class="fa-solid fa-key"></i> การตั้งค่าการเชื่อมต่อ Supabase API Keys
+                    </h3>
+                    <button onclick="toggleSqlHelp()" class="text-xs text-amber-300 hover:underline">
+                        <i class="fa-solid fa-code"></i> สคริปต์ SQL สร้าง Table & RLS
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Supabase Project URL</label>
+                        <input type="text" id="supabaseUrlInput" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400 font-mono text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Supabase Anon / Publishable Key</label>
+                        <input type="password" id="supabaseKeyInput" placeholder="eyJhYmdj..." class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400 font-mono text-xs">
+                    </div>
+                </div>
+                <div class="flex justify-end pt-1">
+                    <button onclick="saveSupabaseCredentials()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition shadow">
+                        <i class="fa-solid fa-plug mr-1"></i> บันทึก & เชื่อมต่อ Supabase
+                    </button>
+                </div>
+            </div>
+
+            <!-- SQL Script Guidance Modal Box -->
+            <div id="sqlHelpBox" class="hidden bg-slate-950 p-5 rounded-2xl border border-slate-700 space-y-3 text-xs text-slate-300">
+                <div class="flex justify-between items-center text-gold-400 font-bold border-b border-slate-800 pb-2">
+                    <span>SQL Script สำหรับรันใน Supabase SQL Editor</span>
+                    <button onclick="toggleSqlHelp()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p class="text-slate-400">คัดลอก SQL นี้ไปรันที่ Supabase Dashboard > SQL Editor เพื่อสร้างตารางและเปิดใช้งาน Row Level Security (RLS):</p>
+                <pre class="bg-slate-900 p-3 rounded-lg overflow-x-auto font-mono text-[11px] text-emerald-400">
+-- 1. Create Students Table
+CREATE TABLE IF NOT EXISTS public.students (
+    app_id TEXT PRIMARY KEY,
+    no INT,
+    prefix TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    time_slot TEXT,
+    room TEXT,
+    committee TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Create System Settings Table
+CREATE TABLE IF NOT EXISTS public.system_settings (
+    id TEXT PRIMARY KEY,
+    config JSONB,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. Enable RLS Policy (Allow Public Read & Write for Demo Anon Key)
+ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow Public Read Students" ON public.students FOR SELECT USING (true);
+CREATE POLICY "Allow Public Write Students" ON public.students FOR ALL USING (true);
+
+ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow Public Settings" ON public.system_settings FOR ALL USING (true);
+                </pre>
+            </div>
+
+            <!-- Import CSV Bar -->
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-gold-400 flex items-center gap-2">
+                            <i class="fa-solid fa-file-import"></i> นำเข้าข้อมูลผู้สมัครจาก Excel / CSV
+                        </h3>
+                        <p class="text-xs text-slate-400">เลือกไฟล์ CSV เพื่ออัปโหลดข้อมูลเข้า Supabase Database</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVImport(event)">
+                        <button onclick="document.getElementById('csvFileInput').click()" class="px-4 py-2 maroon-gradient hover:opacity-95 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-upload"></i> เลือกไฟล์ CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Student List Management Table -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gold-400 flex items-center gap-2">
+                            <i class="fa-solid fa-users-gear"></i> รายชื่อผู้สมัครสอบสัมภาษณ์ (Supabase Synced)
+                        </h3>
+                        <button onclick="openAddStudentModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-plus"></i> เพิ่มผู้สมัครใหม่
+                        </button>
+                    </div>
+
+                    <!-- Students Data Table -->
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-800 sticky top-0 backdrop-blur-md">
+                                    <tr>
+                                        <th class="p-3 text-center">ลำดับ</th>
+                                        <th class="p-3">เลขสมัคร</th>
+                                        <th class="p-3">ชื่อ - นามสกุล</th>
+                                        <th class="p-3">เวลาสัมภาษณ์</th>
+                                        <th class="p-3 text-center">ห้อง</th>
+                                        <th class="p-3 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminStudentTable" class="divide-y divide-slate-800/60 text-slate-300">
+                                    <!-- Rendered dynamically by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Col: Zoom & Audit Logs Config -->
+                <div class="space-y-6">
+                    
+                    <!-- Zoom & Line Config Box -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-sm font-bold text-gold-400 border-b border-slate-800 pb-2">
+                            <i class="fa-solid fa-sliders"></i> ตั้งค่า Zoom & LINE Group
+                        </h3>
+                        
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Topic</label>
+                                <input type="text" id="adminZoomTopic" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Meeting ID</label>
+                                <input type="text" id="adminMeetingId" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Zoom URL</label>
+                                <input type="text" id="adminZoomUrl" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">LINE QR Code Data / Link</label>
+                                <input type="text" id="adminLineQr" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-gold-400">
+                            </div>
+                            <button onclick="saveZoomConfig()" class="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold rounded-xl transition text-xs shadow">
+                                บันทึกการตั้งค่าลง Supabase
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Audit Trail Log Box -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <h3 class="text-sm font-bold text-gold-400 border-b border-slate-800 pb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> Audit Trail Log</span>
+                            <span class="text-[10px] text-slate-500 font-normal">Supabase Event</span>
+                        </h3>
+                        <div id="adminAuditLogs" class="space-y-2 text-[11px] max-h-48 overflow-y-auto pr-1">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer Area -->
+    <footer class="maroon-gradient text-white text-xs py-8 mt-12 border-t-4 border-gold-400">
+        <div class="max-w-6xl mx-auto px-4 text-center space-y-3">
+            <div class="flex justify-center items-center gap-2 text-gold-400 font-bold text-sm">
+                <i class="fa-solid fa-microscope"></i> Medical Technology (International Program)
+            </div>
+            <p class="text-rose-200/80 max-w-xl mx-auto font-sarabun">
+                สำนักวิชาสหเวชศาสตร์ มหาวิทยาลัยวลัยลักษณ์ 222 ต.ไทยบุรี อ.ท่าศาลา จ.นครศรีธรรมราช 80160 <br>
+                โทรศัพท์: 0-7567-2603, 086-367-6176 | อีเมล: medtech2.wu@gmail.com
+            </p>
+            <div class="pt-2 text-[11px] text-rose-300/60 border-t border-white/10 max-w-md mx-auto">
+                © 2026 Walailak University. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMsg" class="font-medium"></span>
+    </div>
+
+    <!-- Modal Form: Add / Edit Student (Admin) -->
+    <div id="studentModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-slate-800">
+            <h3 id="modalTitle" class="text-lg font-bold text-maroon-950 border-b pb-2">เพิ่มข้อมูลผู้สมัครสัมภาษณ์</h3>
+            <input type="hidden" id="editAppId" value="">
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">เลขที่สมัคร (Application Number) <span class="text-rose-600">*</span></label>
+                    <input type="text" id="modalAppId" class="w-full px-3 py-2 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-maroon-800 outline-none">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block font-semibold mb-1">คำนำหน้า</label>
+                        <input type="text" id="modalPrefix" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="นางสาว">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">ชื่อ <span class="text-rose-600">*</span></label>
+                        <input type="text" id="modalFirstName" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">นามสกุล <span class="text-rose-600">*</span></label>
+                        <input type="text" id="modalLastName" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold mb-1">ลำดับเวลาสัมภาษณ์</label>
+                        <input type="text" id="modalTime" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="9.00-9.20 น.">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">ห้องสัมภาษณ์</label>
+                        <input type="text" id="modalRoom" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="ห้อง A">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">คณะกรรมการสัมภาษณ์</label>
+                    <textarea id="modalCommittee" rows="2" class="w-full px-3 py-2 bg-slate-50 border rounded-xl outline-none" placeholder="1. รศ.ดร.มรกต ชาตาธิคุณ..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button onclick="closeStudentModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                <button onclick="saveStudentModal()" class="px-5 py-2 maroon-gradient text-white font-bold rounded-xl text-xs shadow-md">บันทึกข้อมูลลง Supabase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form: Confirm Delete Dialog -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl text-slate-800">
+            <div class="w-14 h-14 bg-rose-100 text-maroon-800 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="confirmTitle" class="text-lg font-bold text-slate-900">ยืนยันการลบข้อมูล</h3>
+            <p id="confirmMessage" class="text-xs text-slate-600 font-sarabun"></p>
+            <div class="flex justify-center gap-3 pt-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2.5 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                <button id="confirmExecuteBtn" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-md">ยืนยันลบข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form: CSV Import Strategy -->
+    <div id="csvImportModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-slate-800">
+            <h3 class="text-lg font-bold text-maroon-950 border-b pb-2">เลือกรูปแบบการนำเข้าข้อมูล CSV</h3>
+            <p id="csvImportSummary" class="text-xs text-slate-600 font-sarabun"></p>
+            
+            <div class="space-y-2 text-xs">
+                <label class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl cursor-pointer hover:bg-rose-50/50">
+                    <input type="radio" name="importMode" value="append" checked class="text-maroon-800">
+                    <div>
+                        <div class="font-bold text-slate-800">เพิ่มต่อท้าย (Append New)</div>
+                        <div class="text-[11px] text-slate-500">นำเข้าเฉพาะรายชื่อใหม่ ข้อมูลเดิมคงเดิม</div>
+                    </div>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl cursor-pointer hover:bg-rose-50/50">
+                    <input type="radio" name="importMode" value="update" class="text-maroon-800">
+                    <div>
+                        <div class="font-bold text-slate-800">อัปเดตข้อมูลเดิม (Update Existing)</div>
+                        <div class="text-[11px] text-slate-500">เขียนทับรายการที่เลขที่สมัครตรงกัน</div>
+                    </div>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl cursor-pointer hover:bg-rose-50/50">
+                    <input type="radio" name="importMode" value="replace" class="text-maroon-800">
+                    <div>
+                        <div class="font-bold text-rose-700">แทนที่ข้อมูลทั้งหมด (Replace All)</div>
+                        <div class="text-[11px] text-slate-500">ลบข้อมูลเดิมทั้งหมด แล้วใส่ข้อมูลชุดใหม่</div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button onclick="closeCsvModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs">ยกเลิก</button>
+                <button onclick="executeCSVImport()" class="px-5 py-2 maroon-gradient text-white font-bold rounded-xl text-xs shadow-md">ดำเนินการนำเข้า</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script: Supabase Integration Core -->
+    <script>
+        // Supabase State & Defaults
+        let supabaseClient = null;
+
+        // Default Credentials Provided by User
+        const DEFAULT_SUPABASE_URL = "https://evwbyjsxmkoesvsnehup.supabase.co";
+        const DEFAULT_SUPABASE_KEY = "sb_publishable_gHwggrcv1pmoGC6cWT9v8g_Wo97G-8o";
+
+        // Default Reference Data
+        const initialSeedStudents = [
+            { no: 1, appId: "17000218", prefix: "นางสาว", firstName: "พุทธิดา", lastName: "พรมจันทร์", time: "9.00 - 9.20 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" },
+            { no: 2, appId: "17003830", prefix: "นาย", firstName: "นันทภพ", lastName: "ภูรีเลิศวาณิชย์", time: "9.20 - 9.40 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" },
+            { no: 3, appId: "17004458", prefix: "นางสาว", firstName: "อุมาพร", lastName: "นาวาล่อง", time: "9.40 - 10.00 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" },
+            { no: 4, appId: "17005931", prefix: "นางสาว", firstName: "ฟาลิชา", lastName: "อิสาเฮาะ", time: "10.00 - 10.20 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" },
+            { no: 5, appId: "17008023", prefix: "นาย", firstName: "จีระศักดิ์", lastName: "สุวรรณฤทธิ์", time: "10.20 - 10.40 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" },
+            { no: 6, appId: "17009160", prefix: "นางสาว", firstName: "ธวัลรัตน์", lastName: "วัฒกีเจริญ", time: "10.40 - 11.00 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" },
+            { no: 7, appId: "17000763", prefix: "นางสาว", firstName: "ชัญญา", lastName: "กรัณย์ไพศาล", time: "11.00 - 11.20 น.", room: "ห้อง A", committee: "1. รศ.ดร.มรกต ชาตาธิคุณ\n2. ผศ.ดร.วิลาวัณย์ ผลาชุม" }
+        ];
+
+        window.appData = {
+            students: [...initialSeedStudents],
+            zoomConfig: {
+                topic: "สัมภาษณ์ TCAS 1.2",
+                date: "November 7, 2026",
+                time: "08:30 AM (Bangkok Time)",
+                meetingId: "991 5540 2901",
+                zoomUrl: "https://zoom.us/j/99155402901",
+                lineQrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://line.me/R/ti/g/tcas12-mt-wu"
+            },
+            committee: [
+                { id: 'c1', name: "รศ.ดร.มรกต ชาตาธิคุณ", role: "ประธานกรรมการสัมภาษณ์", dept: "สาขาวิชาเทคนิคการแพทย์ สำนักวิชาสหเวชศาสตร์", image: "https://placehold.co/200x200/881337/ffffff?text=Assoc.Prof.Moragot" },
+                { id: 'c2', name: "ผศ.ดร.วิลาวัณย์ ผลาชุม", role: "กรรมการสัมภาษณ์", dept: "สาขาวิชาเทคนิคการแพทย์ สำนักวิชาสหเวชศาสตร์", image: "https://placehold.co/200x200/881337/ffffff?text=Asst.Prof.Wilawan" }
+            ],
+            logs: []
+        };
+
+        window.isAdminMode = false;
+        let pendingImportData = [];
+
+        // Initialize Supabase Client Connection with Fallback Defaults
+        function initSupabase() {
+            const activeUrl = localStorage.getItem('supabase_url') || DEFAULT_SUPABASE_URL;
+            const activeKey = localStorage.getItem('supabase_key') || DEFAULT_SUPABASE_KEY;
+
+            if (activeUrl && activeKey) {
+                try {
+                    supabaseClient = supabase.createClient(activeUrl, activeKey);
+                    document.getElementById('supabaseUrlInput').value = activeUrl;
+                    document.getElementById('supabaseKeyInput').value = activeKey;
+                    document.getElementById('cloudStatus').innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-400"></i> Supabase Connected (${activeUrl.split('.')[0].replace('https://','')})`;
+                    fetchFromSupabase();
+                    return;
+                } catch (e) {
+                    console.error("Supabase init error:", e);
+                }
+            }
+            
+            document.getElementById('cloudStatus').innerHTML = `<i class="fa-solid fa-database text-amber-400"></i> Supabase Ready (Local Cache)`;
+            renderUIComponents();
+        }
+<!-- ... existing code -->
